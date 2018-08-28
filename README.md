@@ -4,12 +4,12 @@ Additional layer of security when performing actions through rails console in se
 
 ### Installation
 
-##### Add to Gemfile
-```
+Add to Gemfile
+```ruby
 gem 'carefully'
 ```
 
-##### Run from terminal
+Run from terminal
 ```
 rails g carefully
 ```
@@ -26,10 +26,10 @@ include Carefully
 
 You might as well include it in your ActiveRecord::Base wrapper class (like ApplicationRecord) to have it for all models.
 
-##### Disabling the prompt
+#### Disabling the prompt
 
 You can disable the prompting for blocks like this:
-```
+```ruby
 Carefully.allow_all do
   this.destroy
   that.destroy
