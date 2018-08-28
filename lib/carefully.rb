@@ -12,6 +12,18 @@ module Carefully
 
         Carefully.confirm_destructive_action && super
       end
+
+      def delete(ids)
+        return super unless Carefully.configuration.enabled?
+
+        Carefully.confirm_destructive_action && super
+      end
+
+      def destroy(ids)
+        return super unless Carefully.configuration.enabled?
+
+        Carefully.confirm_destructive_action && super
+      end
     end
   end
 
@@ -25,6 +37,15 @@ module Carefully
     yield configuration if block_given?
 
     configuration.set_enabled
+  end
+
+  def self.allow_all
+    begin
+      Carefully.configuration.instance_variable_set :@enabled, false
+      yield
+    ensure
+      Carefully.configuration.set_enabled
+    end
   end
 
   def self.confirm_destructive_action
