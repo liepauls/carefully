@@ -1,16 +1,16 @@
-module SafeDelete
+module Carefully
   def self.included(base)
     base.instance_eval do
       def destroy_all
-        return super unless SafeDelete.configuration.enabled
+        return super unless Carefully.configuration.enabled
 
-        SafeDelete.confirm_destructive_action && super
+        Carefully.confirm_destructive_action && super
       end
 
       def delete_all
-        return super unless SafeDelete.configuration.enabled
+        return super unless Carefully.configuration.enabled
 
-        SafeDelete.confirm_destructive_action && super
+        Carefully.confirm_destructive_action && super
       end
     end
   end
@@ -28,10 +28,10 @@ module SafeDelete
   end
 
   def self.confirm_destructive_action
-    puts SafeDelete.configuration.confirmation_message
+    puts Carefully.configuration.confirmation_message
     print '> '
 
-    if gets.chomp == SafeDelete.configuration.confirmation_text
+    if gets.chomp == Carefully.configuration.confirmation_text
       true
     else
       puts "\"#{caller_locations(1, 1)[0].label}\" aborted\n"
@@ -40,16 +40,16 @@ module SafeDelete
   end
 
   def destroy
-    return super unless SafeDelete.configuration.enabled
+    return super unless Carefully.configuration.enabled
     return super if caller_locations(1, 10).map(&:label).include? 'destroy_all'
 
-    SafeDelete.confirm_destructive_action && super
+    Carefully.confirm_destructive_action && super
   end
 
   def delete
-    return super unless SafeDelete.configuration.enabled
+    return super unless Carefully.configuration.enabled
 
-    SafeDelete.confirm_destructive_action && super
+    Carefully.confirm_destructive_action && super
   end
 
   private

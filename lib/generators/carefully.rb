@@ -1,4 +1,4 @@
-SafeDelete.configure do |config|
+Carefully.configure do |config|
   # an array of environments in which a confirmation is required to destroy objects
   # config.protected_environments = [:production, :demo, :staging]
 
@@ -9,4 +9,4 @@ SafeDelete.configure do |config|
   # config.confirmation_text      = 'yes'
 end
 
-ActiveRecord::Base.include SafeDelete
+ActiveRecord::Base.include Carefully
