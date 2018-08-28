@@ -8,5 +8,3 @@ Carefully.configure do |config|
   # answer required to count the destroy as confirmed
   # config.confirmation_text      = 'yes'
 end
-
-ActiveRecord::Base.include Carefully

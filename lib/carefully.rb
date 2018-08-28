@@ -2,13 +2,13 @@ module Carefully
   def self.included(base)
     base.instance_eval do
       def destroy_all
-        return super unless Carefully.configuration.enabled
+        return super unless Carefully.configuration.enabled?
 
         Carefully.confirm_destructive_action && super
       end
 
       def delete_all
-        return super unless Carefully.configuration.enabled
+        return super unless Carefully.configuration.enabled?
 
         Carefully.confirm_destructive_action && super
       end
@@ -40,14 +40,14 @@ module Carefully
   end
 
   def destroy
-    return super unless Carefully.configuration.enabled
+    return super unless Carefully.configuration.enabled?
     return super if caller_locations(1, 10).map(&:label).include? 'destroy_all'
 
     Carefully.confirm_destructive_action && super
   end
 
   def delete
-    return super unless Carefully.configuration.enabled
+    return super unless Carefully.configuration.enabled?
 
     Carefully.confirm_destructive_action && super
   end
@@ -55,7 +55,7 @@ module Carefully
   private
 
   class Configuration
-    attr_accessor :protected_environments, :confirmation_message, :confirmation_text, :enabled
+    attr_accessor :protected_environments, :confirmation_message, :confirmation_text
 
     def initialize
       self.protected_environments = [:production, :demo, :staging]
@@ -64,7 +64,11 @@ module Carefully
     end
 
     def set_enabled
-      self.enabled = protected_environment? && rails_console?
+      @enabled = protected_environment? && rails_console?
+    end
+
+    def enabled?
+      !!@enabled
     end
 
     private
