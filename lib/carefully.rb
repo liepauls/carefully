@@ -89,7 +89,6 @@ module Carefully
 
     def rails_console?
       defined?(Rails::Console)
-      true
     end
   end
 end
