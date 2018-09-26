@@ -1,28 +1,16 @@
 module Carefully
   def self.included(base)
     base.instance_eval do
-      def destroy_all
-        return super unless Carefully.configuration.enabled?
-
-        Carefully.confirm_destructive_action && super
-      end
-
       def delete_all
-        return super unless Carefully.configuration.enabled?
+        return super if Carefully.configuration.disabled?
 
-        Carefully.confirm_destructive_action && super
+        Carefully.confirm_destructive_action(:delete_all) && super
       end
 
       def delete(ids)
-        return super unless Carefully.configuration.enabled?
+        return super if Carefully.configuration.disabled?
 
-        Carefully.confirm_destructive_action && super
-      end
-
-      def destroy(ids)
-        return super unless Carefully.configuration.enabled?
-
-        Carefully.confirm_destructive_action && super
+        Carefully.confirm_destructive_action(:delete) && super
       end
     end
   end
@@ -48,29 +36,26 @@ module Carefully
     end
   end
 
-  def self.confirm_destructive_action
+  def self.confirm_destructive_action(method_name)
     puts Carefully.configuration.confirmation_message
     print '> '
 
-    if gets.chomp == Carefully.configuration.confirmation_text
-      true
-    else
-      puts "\"#{caller_locations(1, 1)[0].label}\" aborted\n"
-      false
-    end
-  end
+    return true if gets.chomp == Carefully.configuration.confirmation_text
 
-  def destroy
-    return super unless Carefully.configuration.enabled?
-    return super if caller_locations(1, 10).map(&:label).include? 'destroy_all'
-
-    Carefully.confirm_destructive_action && super
+    puts "\"#{method_name}\" aborted!"
+    false
   end
 
   def delete
-    return super unless Carefully.configuration.enabled?
+    return super if Carefully.configuration.disabled?
 
-    Carefully.confirm_destructive_action && super
+    Carefully.confirm_destructive_action(:delete) && super
+  end
+
+  def destroy
+    return super if Carefully.configuration.disabled?
+
+    Carefully.confirm_destructive_action(:destroy) && super
   end
 
   private
@@ -80,7 +65,7 @@ module Carefully
 
     def initialize
       self.protected_environments = [:production, :demo, :staging]
-      self.confirmation_message   = 'You are performing destructive actions in a protected environment. Do you want to continue?'
+      self.confirmation_message   = "You are performing destructive actions in #{Rails.env} environment. Do you want to continue?"
       self.confirmation_text      = 'yes'
     end
 
@@ -92,6 +77,10 @@ module Carefully
       !!@enabled
     end
 
+    def disabled?
+      !@enabled
+    end
+
     private
 
     def protected_environment?
@@ -100,6 +89,7 @@ module Carefully
 
     def rails_console?
       defined?(Rails::Console)
+      true
     end
   end
 end
